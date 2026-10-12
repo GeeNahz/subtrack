@@ -23,6 +23,11 @@
         required
         phx-mounted={JS.focus()}
       />
+      <.inputs_for :let={pf} field={f[:profile]}>
+        <.input field={pf[:first_name]} type="text" label="First name" required />
+        <.input field={pf[:last_name]} type="text" label="Last name" />
+        <.input field={pf[:username]} type="text" label="Username" />
+      </.inputs_for>
 
       <.button phx-disable-with="Creating account..." class="btn btn-primary w-full">
         Create an account

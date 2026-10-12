@@ -2,6 +2,8 @@ defmodule Subtrack.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Subtrack.Accounts.Profile
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "users" do
@@ -10,6 +12,11 @@ defmodule Subtrack.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
+
+    has_one :profile, Subtrack.Accounts.Profile
+    field :phone_number, :string
+    field :phone_confirmed_at, :utc_datetime
+    field :timezone, :string, default: "Etc/UTC"
 
     timestamps(type: :utc_datetime)
   end
@@ -130,5 +137,30 @@ defmodule Subtrack.Accounts.User do
   def valid_password?(_, _) do
     Bcrypt.no_user_verify()
     false
+  end
+
+  @doc """
+  Changeset used for registration: the email plus a required nested profile.
+  """
+  def registration_changeset(user, attrs, opts \\ []) do
+    user
+    |> email_changeset(attrs, opts)
+    |> cast_assoc(:profile, required: true, with: &Profile.changeset/2)
+  end
+
+  @doc """
+  Changeset for contact details (phone and timezone)
+  """
+  def contact_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:phone_number, :timezone])
+    |> validate_required(:timezone)
+    |> validate_format(:phone_number, ~r/^\+[1-9]\d{6,14}$/,
+      message: "use international format, e.g. +2348012345678"
+    )
+    |> validate_change(:timezone, fn :timezone, tz ->
+      if Tzdata.zone_exists?(tz), do: [], else: [timezone: "is not a valid timezone"]
+    end)
+    |> unique_constraint(:phone_number)
   end
 end

@@ -14,7 +14,8 @@ defmodule Subtrack.AccountsFixtures do
 
   def valid_user_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
-      email: unique_user_email()
+      email: unique_user_email(),
+      profile: %{first_name: "Test"}
     })
   end
 

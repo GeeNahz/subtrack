@@ -2,10 +2,10 @@ defmodule SubtrackWeb.UserRegistrationController do
   use SubtrackWeb, :controller
 
   alias Subtrack.Accounts
-  alias Subtrack.Accounts.User
+  alias Subtrack.Accounts.{User, Profile}
 
   def new(conn, _params) do
-    changeset = Accounts.change_user_email(%User{})
+    changeset = Accounts.change_user_registration(%User{profile: %Profile{}})
     render(conn, :new, changeset: changeset)
   end
 

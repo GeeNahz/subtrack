@@ -85,6 +85,19 @@ defmodule Subtrack.AccountsTest do
       assert is_nil(user.confirmed_at)
       assert is_nil(user.password)
     end
+
+    # new test
+    test "requires profile to be set" do
+      email = unique_user_email()
+      {:error, changeset} = Accounts.register_user(%{email: email})
+      assert %{profile: ["can't be blank"]} = errors_on(changeset)
+    end
+
+    test "validate required profile first_name" do
+      email = unique_user_email()
+      {:error, changeset} = Accounts.register_user(%{email: email, profile: %{}})
+      assert %{profile: %{first_name: ["can't be blank"]}} = errors_on(changeset)
+    end
   end
 
   describe "sudo_mode?/2" do
