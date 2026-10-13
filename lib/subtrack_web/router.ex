@@ -47,6 +47,7 @@ defmodule SubtrackWeb.Router do
 
   ## Authentication routes
 
+  # Users routes
   scope "/", SubtrackWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
@@ -60,6 +61,13 @@ defmodule SubtrackWeb.Router do
     get "/users/settings", UserSettingsController, :edit
     put "/users/settings", UserSettingsController, :update
     get "/users/settings/confirm-email/:token", UserSettingsController, :confirm_email
+  end
+
+  # Rest of app
+  scope "/", SubtrackWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    resources "/payment_methods", PaymentMethodController
   end
 
   scope "/", SubtrackWeb do

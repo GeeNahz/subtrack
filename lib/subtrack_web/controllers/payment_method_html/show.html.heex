@@ -1,0 +1,25 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <.header>
+    Payment method {@payment_method.id}
+    <:subtitle>This is a payment_method record from your database.</:subtitle>
+    <:actions>
+      <.button navigate={~p"/payment_methods"}>
+        <.icon name="hero-arrow-left" />
+      </.button>
+      <.button variant="primary" navigate={~p"/payment_methods/#{@payment_method}/edit?return_to=show"}>
+        <.icon name="hero-pencil-square" /> Edit payment_method
+      </.button>
+    </:actions>
+  </.header>
+
+  <.list>
+    <:item title="Nickname">{@payment_method.nickname}</:item>
+    <:item title="Brand">{@payment_method.brand}</:item>
+    <:item title="Card mode">{@payment_method.card_mode}</:item>
+    <:item title="Currency">{@payment_method.currency}</:item>
+    <:item title="Last4">{@payment_method.last4}</:item>
+    <:item title="Bank name">{@payment_method.bank_name}</:item>
+    <:item title="Expiry month">{@payment_method.expiry_month}</:item>
+    <:item title="Expiry year">{@payment_method.expiry_year}</:item>
+  </.list>
+</Layouts.app>

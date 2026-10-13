@@ -1,0 +1,32 @@
+<.form :let={f} for={@changeset} action={@action}>
+  <.input field={f[:nickname]} type="text" label="Nickname" />
+  <.input
+    field={f[:brand]}
+    type="select"
+    label="Brand"
+    prompt="Choose a value"
+    options={Ecto.Enum.values(Subtrack.Subscriptions.PaymentMethod, :brand)}
+  />
+  <.input
+    field={f[:card_mode]}
+    type="select"
+    label="Card mode"
+    prompt="Choose a value"
+    options={Ecto.Enum.values(Subtrack.Subscriptions.PaymentMethod, :card_mode)}
+  />
+  <.input
+    field={f[:currency]}
+    type="select"
+    label="Card currency"
+    prompt="Choose..."
+    options={~w(NGN USD GBP EUR)}
+  />
+  <.input field={f[:last4]} type="text" label="Last4" />
+  <.input field={f[:bank_name]} type="text" label="Bank name" />
+  <.input field={f[:expiry_month]} type="number" label="Expiry month" />
+  <.input field={f[:expiry_year]} type="number" label="Expiry year" />
+  <footer>
+    <.button variant="primary">Save Payment method</.button>
+    <.button :if={@return_to} href={@return_to}>Cancel</.button>
+  </footer>
+</.form>

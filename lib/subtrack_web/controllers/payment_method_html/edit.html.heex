@@ -1,0 +1,8 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <.header>
+    Edit Payment method {@payment_method.id}
+    <:subtitle>Use this form to manage payment_method records in your database.</:subtitle>
+  </.header>
+
+  <.payment_method_form changeset={@changeset} action={~p"/payment_methods/#{@payment_method}"} return_to={~p"/payment_methods"} />
+</Layouts.app>
