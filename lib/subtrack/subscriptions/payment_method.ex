@@ -41,9 +41,15 @@ defmodule Subtrack.Subscriptions.PaymentMethod do
     ])
     |> update_change(:currency, &String.upcase/1)
     |> validate_length(:currency, is: 3)
+    |> validate_inclusion(:currency, Subtrack.Currencies.codes())
     |> validate_format(:last4, ~r/^\d{4}$/, message: "must be exactly 4 digits")
     |> validate_number(:expiry_month, greater_than_or_equal_to: 1, less_than_or_equal_to: 12)
     |> validate_number(:expiry_year, greater_than_or_equal_to: 2000, less_than_or_equal_to: 2100)
     |> put_change(:user_id, user_scope.user.id)
+  end
+
+  def label(%__MODULE__{} = pm) do
+    name = pm.nickname || pm.bank_name || String.upcase(to_string(pm.brand))
+    "#{name} ** #{pm.last4} (#{pm.currency})"
   end
 end

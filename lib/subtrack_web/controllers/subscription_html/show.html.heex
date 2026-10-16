@@ -1,0 +1,52 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <.header>
+    Subscription {@subscription.id}
+    <:subtitle>This is a subscription record from your database.</:subtitle>
+    <:actions>
+      <.button navigate={~p"/subscriptions"}>
+        <.icon name="hero-arrow-left" />
+      </.button>
+      <.button
+        variant="primary"
+        navigate={~p"/subscriptions/#{@subscription}/edit?return_to=show"}
+      >
+        <.icon name="hero-pencil-square" /> Edit subscription
+      </.button>
+    </:actions>
+  </.header>
+
+  <.list>
+    <:item title="Platform">{@subscription.name}</:item>
+    <:item title="Plan">{@subscription.plan_name}</:item>
+    <:item title="Amount">{@subscription.amount}</:item>
+    <:item title="Fee amount">{@subscription.fee_amount}</:item>
+    <:item title="Charge">
+      {money(
+        Subtrack.Subscriptions.Subscription.total_amount(@subscription),
+        @subscription.currency
+      )}
+    </:item>
+    <:item
+      :if={Subtrack.Subscriptions.Subscription.estimated_card_charge(@subscription)}
+      title="Estimated card debit"
+    >
+      ~ {money(
+        Subtrack.Subscriptions.Subscription.estimated_card_charge(@subscription),
+        @subscription.payment_method.currency
+      )} (at {@subscription.fx_rate})
+    </:item>
+    <:item title="Billing currency">{@subscription.currency}</:item>
+    <:item title="Payment Method">{@subscription.payment_method}</:item>
+    <:item
+      :if={@subscription.fx_rate}
+      title="Exchange rate"
+    >
+      {@subscription.fx_rate}
+    </:item>
+    <:item title="Billing cycle">{@subscription.billing_cycle}</:item>
+    <:item title="Next renewal on">{@subscription.next_renewal_on}</:item>
+    <:item title="Status">{@subscription.status}</:item>
+    <:item title="Manage url">{@subscription.manage_url}</:item>
+    <:item title="Notes">{@subscription.notes}</:item>
+  </.list>
+</Layouts.app>

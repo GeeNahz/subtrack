@@ -68,6 +68,7 @@ defmodule SubtrackWeb.Router do
     pipe_through [:browser, :require_authenticated_user]
 
     resources "/payment_methods", PaymentMethodController
+    resources "/subscriptions", SubscriptionController
   end
 
   scope "/", SubtrackWeb do

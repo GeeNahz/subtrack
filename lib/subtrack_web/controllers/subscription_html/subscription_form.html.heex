@@ -1,0 +1,47 @@
+<.form :let={f} for={@changeset} action={@action}>
+  <.input field={f[:name]} type="text" label="Platform" />
+  <.input field={f[:plan_name]} type="text" label="Plan" />
+  <.input field={f[:amount]} type="number" label="Amount" step="0.01" />
+  <.input field={f[:fee_amount]} type="number" label="Fee / charges" step="0.01" />
+  <.input
+    field={f[:currency]}
+    type="select"
+    label="Billing currency"
+    prompt="Choose..."
+    options={Subtrack.Currencies.codes()}
+  />
+  <.input
+    field={f[:payment_method_id]}
+    type="select"
+    label="Card"
+    prompt="No card"
+    options={@payment_method_options}
+  />
+  <.input
+    field={f[:fx_rate]}
+    type="number"
+    label="Exchange rate (card currency per 1 billing currency)"
+    step="0.000001"
+  />
+  <.input
+    field={f[:billing_cycle]}
+    type="select"
+    label="Billing cycle"
+    prompt="Choose a value"
+    options={Ecto.Enum.values(Subtrack.Subscriptions.Subscription, :billing_cycle)}
+  />
+  <.input field={f[:next_renewal_on]} type="date" label="Next renewal on" />
+  <.input
+    field={f[:status]}
+    type="select"
+    label="Status"
+    prompt="Choose a value"
+    options={Ecto.Enum.values(Subtrack.Subscriptions.Subscription, :status)}
+  />
+  <.input field={f[:manage_url]} type="text" label="Manage url" />
+  <.input field={f[:notes]} type="textarea" label="Notes" />
+  <footer>
+    <.button variant="primary">Save Subscription</.button>
+    <.button :if={@return_to} href={@return_to}>Cancel</.button>
+  </footer>
+</.form>

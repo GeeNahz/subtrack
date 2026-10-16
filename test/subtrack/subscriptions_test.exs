@@ -149,4 +149,208 @@ defmodule Subtrack.SubscriptionsTest do
       assert %Ecto.Changeset{} = Subscriptions.change_payment_method(scope, payment_method)
     end
   end
+
+  describe "subscriptions" do
+    alias Subtrack.Subscriptions.{Subscription, PaymentMethod}
+
+    import Subtrack.AccountsFixtures, only: [user_scope_fixture: 0]
+    import Subtrack.SubscriptionsFixtures
+
+    @invalid_attrs %{
+      name: nil,
+      status: nil,
+      currency: nil,
+      amount: nil,
+      plan_name: nil,
+      fee_amount: nil,
+      fx_rate: nil,
+      billing_cycle: nil,
+      next_renewal_on: nil,
+      manage_url: nil,
+      notes: nil
+    }
+
+    test "list_subscriptions/1 returns all scoped subscriptions" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+      other_subscription = subscription_fixture(other_scope)
+      assert Subscriptions.list_subscriptions(scope) == [subscription]
+      assert Subscriptions.list_subscriptions(other_scope) == [other_subscription]
+    end
+
+    test "get_subscription!/2 returns the subscription with given id" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+      other_scope = user_scope_fixture()
+      assert Subscriptions.get_subscription!(scope, subscription.id) == subscription
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Subscriptions.get_subscription!(other_scope, subscription.id)
+      end
+    end
+
+    test "create_subscription/2 with valid data creates a subscription" do
+      valid_attrs = %{
+        name: "some name",
+        status: :active,
+        currency: "GBP",
+        amount: "120.5",
+        plan_name: "some plan_name",
+        fee_amount: "120.5",
+        fx_rate: "120.5",
+        billing_cycle: :weekly,
+        next_renewal_on: ~D[2026-10-12],
+        manage_url: "some manage_url",
+        notes: "some notes"
+      }
+
+      scope = user_scope_fixture()
+
+      assert {:ok, %Subscription{} = subscription} =
+               Subscriptions.create_subscription(scope, valid_attrs)
+
+      assert subscription.name == "some name"
+      assert subscription.status == :active
+      assert subscription.currency == "GBP"
+      assert subscription.amount == Decimal.new("120.5")
+      assert subscription.plan_name == "some plan_name"
+      assert subscription.fee_amount == Decimal.new("120.5")
+      assert subscription.fx_rate == Decimal.new("120.5")
+      assert subscription.billing_cycle == :weekly
+      assert subscription.next_renewal_on == ~D[2026-10-12]
+      assert subscription.manage_url == "some manage_url"
+      assert subscription.notes == "some notes"
+      assert subscription.user_id == scope.user.id
+    end
+
+    test "create_subscription/2 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+
+      assert {:error, %Ecto.Changeset{}} =
+               Subscriptions.create_subscription(scope, @invalid_attrs)
+    end
+
+    test "update_subscription/3 with valid data updates the subscription" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+
+      update_attrs = %{
+        name: "some updated name",
+        status: :paused,
+        currency: "GBP",
+        amount: "456.7",
+        plan_name: "some updated plan_name",
+        fee_amount: "456.7",
+        fx_rate: "456.7",
+        billing_cycle: :monthly,
+        next_renewal_on: ~D[2026-10-13],
+        manage_url: "some updated manage_url",
+        notes: "some updated notes"
+      }
+
+      assert {:ok, %Subscription{} = subscription} =
+               Subscriptions.update_subscription(scope, subscription, update_attrs)
+
+      assert subscription.name == "some updated name"
+      assert subscription.status == :paused
+      assert subscription.currency == "GBP"
+      assert subscription.amount == Decimal.new("456.7")
+      assert subscription.plan_name == "some updated plan_name"
+      assert subscription.fee_amount == Decimal.new("456.7")
+      assert subscription.fx_rate == Decimal.new("456.7")
+      assert subscription.billing_cycle == :monthly
+      assert subscription.next_renewal_on == ~D[2026-10-13]
+      assert subscription.manage_url == "some updated manage_url"
+      assert subscription.notes == "some updated notes"
+    end
+
+    test "update_subscription/3 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+
+      assert_raise MatchError, fn ->
+        Subscriptions.update_subscription(other_scope, subscription, %{})
+      end
+    end
+
+    test "update_subscription/3 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Subscriptions.update_subscription(scope, subscription, @invalid_attrs)
+
+      assert subscription == Subscriptions.get_subscription!(scope, subscription.id)
+    end
+
+    test "delete_subscription/2 deletes the subscription" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+      assert {:ok, %Subscription{}} = Subscriptions.delete_subscription(scope, subscription)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Subscriptions.get_subscription!(scope, subscription.id)
+      end
+    end
+
+    test "delete_subscription/2 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+
+      assert_raise MatchError, fn ->
+        Subscriptions.delete_subscription(other_scope, subscription)
+      end
+    end
+
+    test "change_subscription/2 returns a subscription changeset" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+      assert %Ecto.Changeset{} = Subscriptions.change_subscription(scope, subscription)
+    end
+
+    test "create_subscription/2 rejects another user's payment method" do
+      scope = user_scope_fixture()
+      other_pm = payment_method_fixture(user_scope_fixture())
+
+      attrs = %{
+        name: "Netflix",
+        amount: "15.99",
+        fee_amount: "0",
+        currency: "NGN",
+        billing_cycle: :monthly,
+        next_renewal_on: ~D[2026-11-01],
+        payment_method_id: other_pm.id
+      }
+
+      assert {:error, changeset} = Subscriptions.create_subscription(scope, attrs)
+      assert %{payment_method_id: ["is not one of your payment methods"]} = errors_on(changeset)
+    end
+
+    test "estimated_card_charge/1 converts with the fx rate" do
+      sub = %Subscription{
+        amount: Decimal.new("15.00"),
+        fee_amount: Decimal.new("0.99"),
+        currency: "USD",
+        fx_rate: Decimal.new("1600"),
+        payment_method: %PaymentMethod{currency: "NGN"}
+      }
+
+      assert Decimal.equal?(Subscription.estimated_card_charge(sub), Decimal.new("25584.00"))
+    end
+
+    test "estimated_card_charge/1 is nil when card and plan currency match" do
+      sub = %Subscription{
+        amount: Decimal.new("5000"),
+        fee_amount: Decimal.new("0"),
+        currency: "NGN",
+        fx_rate: Decimal.new("1"),
+        payment_method: %PaymentMethod{currency: "NGN"}
+      }
+
+      assert Subscription.estimated_card_charge(sub) == nil
+    end
+  end
 end

@@ -19,7 +19,7 @@
     type="select"
     label="Card currency"
     prompt="Choose..."
-    options={~w(NGN USD GBP EUR)}
+    options={Subtrack.Currencies.codes()}
   />
   <.input field={f[:last4]} type="text" label="Last4" />
   <.input field={f[:bank_name]} type="text" label="Bank name" />
