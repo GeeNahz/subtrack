@@ -291,4 +291,171 @@ defmodule Subtrack.Subscriptions do
 
     Subscription.changeset(subscription, attrs, scope)
   end
+
+  alias Subtrack.Subscriptions.Reminder
+  alias Subtrack.Accounts.Scope
+
+  @doc """
+  Subscribes to scoped notifications about any reminder changes.
+
+  The broadcasted messages match the pattern:
+
+    * {:created, %Reminder{}}
+    * {:updated, %Reminder{}}
+    * {:deleted, %Reminder{}}
+
+  """
+  def subscribe_reminders(%Scope{} = scope) do
+    key = scope.user.id
+
+    Phoenix.PubSub.subscribe(Subtrack.PubSub, "user:#{key}:reminders")
+  end
+
+  defp broadcast_reminder(%Scope{} = scope, message) do
+    key = scope.user.id
+
+    Phoenix.PubSub.broadcast(Subtrack.PubSub, "user:#{key}:reminders", message)
+  end
+
+  @doc """
+  Returns the list of reminders.
+
+  ## Examples
+
+      iex> list_reminders(scope, subscription)
+      [%Reminder{}, ...]
+
+  """
+
+  # def list_reminders(%Scope{} = scope) do
+  #   Repo.all_by(Reminder, user_id: scope.user.id)
+  # end
+
+  def list_reminders(%Scope{} = scope, %Subscription{} = subscription) do
+    from(
+      r in Reminder,
+      where: r.user_id == ^scope.user.id and r.subscription_id == ^subscription.id,
+      order_by: [desc: r.days_before, asc: r.send_at]
+    )
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single reminder.
+
+  Raises `Ecto.NoResultsError` if the Reminder does not exist.
+
+  ## Examples
+
+      iex> get_reminder!(scope, 321, 123)
+      %Reminder{}
+
+      iex> get_reminder!(scope, 654, 456)
+      ** (Ecto.NoResultsError)
+
+  """
+
+  # def get_reminder!(%Scope{} = scope, id) do
+  #   Repo.get_by!(Reminder, id: id, user_id: scope.user.id)
+  # end
+
+  def get_reminder!(%Scope{} = scope, %Subscription{} = subscription, id) do
+    Repo.get_by!(Reminder, id: id, subscription_id: subscription.id, user_id: scope.user.id)
+  end
+
+  @doc """
+  Creates a reminder.
+
+  ## Examples
+
+      iex> create_reminder(scope, subscription, %{field: value})
+      {:ok, %Reminder{}}
+
+      iex> create_reminder(scope, subscription, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+
+  # def create_reminder(%Scope{} = scope, attrs) do
+  #   with {:ok, reminder = %Reminder{}} <-
+  #          %Reminder{}
+  #          |> Reminder.changeset(attrs, scope)
+  #          |> Repo.insert() do
+  #     broadcast_reminder(scope, {:created, reminder})
+  #     {:ok, reminder}
+  #   end
+  # end
+
+  def create_reminder(%Scope{} = scope, %Subscription{} = subscription, attrs) do
+    true = subscription.user_id == scope.user.id
+
+    with {:ok, reminder = %Reminder{}} <-
+           %Reminder{subscription_id: subscription.id}
+           |> Reminder.changeset(attrs, scope)
+           |> Repo.insert() do
+      broadcast_reminder(scope, {:created, reminder})
+      {:ok, reminder}
+    end
+  end
+
+  @doc """
+  Updates a reminder.
+
+  ## Examples
+
+      iex> update_reminder(scope, reminder, %{field: new_value})
+      {:ok, %Reminder{}}
+
+      iex> update_reminder(scope, reminder, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_reminder(%Scope{} = scope, %Reminder{} = reminder, attrs) do
+    true = reminder.user_id == scope.user.id
+
+    with {:ok, reminder = %Reminder{}} <-
+           reminder
+           |> Reminder.changeset(attrs, scope)
+           |> Repo.update() do
+      broadcast_reminder(scope, {:updated, reminder})
+      {:ok, reminder}
+    end
+  end
+
+  @doc """
+  Deletes a reminder.
+
+  ## Examples
+
+      iex> delete_reminder(scope, reminder)
+      {:ok, %Reminder{}}
+
+      iex> delete_reminder(scope, reminder)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_reminder(%Scope{} = scope, %Reminder{} = reminder) do
+    true = reminder.user_id == scope.user.id
+
+    with {:ok, reminder = %Reminder{}} <-
+           Repo.delete(reminder) do
+      broadcast_reminder(scope, {:deleted, reminder})
+      {:ok, reminder}
+    end
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking reminder changes.
+
+  ## Examples
+
+      iex> change_reminder(scope, reminder)
+      %Ecto.Changeset{data: %Reminder{}}
+
+  """
+  def change_reminder(%Scope{} = scope, %Reminder{} = reminder, attrs \\ %{}) do
+    true = reminder.user_id == scope.user.id
+
+    Reminder.changeset(reminder, attrs, scope)
+  end
 end

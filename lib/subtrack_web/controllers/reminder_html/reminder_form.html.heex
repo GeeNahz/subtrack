@@ -1,0 +1,32 @@
+<.form :let={f} for={@changeset} action={@action}>
+  <.input
+    field={f[:days_before]}
+    type="number"
+    min="0"
+    max="90"
+    label="Days before renewal (0 = on the day)"
+  />
+  <.input field={f[:send_at]} type="time" label="Send at (your timezone)" />
+
+  <fieldset class="mb-2">
+    <legend class="label mb-1">Send via</legend>
+    <label :for={ch <- [:email, :sms]} class="label mr-4">
+      <input
+        type="checkbox"
+        name="reminder[channels][]"
+        value={ch}
+        checked={to_string(ch) in Enum.map(f[:channels].value || [], &to_string/1)}
+      />
+      {ch}
+    </label>
+    <p :for={msg <- Enum.map(f[:channels].errors, &elem(&1, 0))} class="text-error text-sm">
+      {msg}
+    </p>
+  </fieldset>
+
+  <.input field={f[:enabled]} type="checkbox" label="Enabled" />
+  <footer>
+    <.button variant="primary">Save Reminder</.button>
+    <.button :if={@return_to} href={@return_to}>Cancel</.button>
+  </footer>
+</.form>

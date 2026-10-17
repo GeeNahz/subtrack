@@ -21,4 +21,11 @@ defmodule SubtrackWeb.SubscriptionHTML do
   def money(%Decimal{} = amount, currency) do
     "#{currency} #{amount |> Decimal.round(2) |> Decimal.to_string(:normal)}"
   end
+
+  def reminder_summary(%{days_before: 0, send_at: t}), do: "On the day, at #{time(t)}"
+
+  def reminder_summary(%{days_before: d, send_at: t}),
+    do: "#{d} #{if d == 1, do: "day", else: "days"} before, at #{time(t)}"
+
+  defp time(t), do: Calendar.strftime(t, "%H:%M")
 end

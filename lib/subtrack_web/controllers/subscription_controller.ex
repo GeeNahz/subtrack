@@ -34,8 +34,10 @@ defmodule SubtrackWeb.SubscriptionController do
   end
 
   def show(conn, %{"id" => id}) do
-    subscription = Subscriptions.get_subscription!(conn.assigns.current_scope, id)
-    render(conn, :show, subscription: subscription)
+    scope = conn.assigns.current_scope
+    subscription = Subscriptions.get_subscription!(scope, id)
+    reminders = Subscriptions.list_reminders(scope, subscription)
+    render(conn, :show, subscription: subscription, reminders: reminders)
   end
 
   def edit(conn, %{"id" => id}) do

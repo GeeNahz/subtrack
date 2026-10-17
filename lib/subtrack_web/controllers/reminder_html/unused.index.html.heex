@@ -1,0 +1,28 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <.header>
+    Listing Reminders
+    <:actions>
+      <%!-- <.button href={~p"/reminders/new"}> --%>
+      <%!--   <.icon name="hero-plus" /> New Reminder --%>
+      <%!-- </.button> --%>
+    </:actions>
+  </.header>
+
+  <%!-- <.table id="reminders" rows={@reminders} row_click={&JS.navigate(~p"/reminders/#{&1}")}> --%>
+  <%!--   <:col :let={reminder} label="Days before">{reminder.days_before}</:col> --%>
+  <%!--   <:col :let={reminder} label="Send at">{reminder.send_at}</:col> --%>
+  <%!--   <:col :let={reminder} label="Channels">{reminder.channels}</:col> --%>
+  <%!--   <:col :let={reminder} label="Enabled">{reminder.enabled}</:col> --%>
+  <%!--   <:action :let={reminder}> --%>
+  <%!--     <div class="sr-only"> --%>
+  <%!--       <.link navigate={~p"/reminders/#{reminder}"}>Show</.link> --%>
+  <%!--     </div> --%>
+  <%!--     <.link navigate={~p"/reminders/#{reminder}/edit"}>Edit</.link> --%>
+  <%!--   </:action> --%>
+  <%!--   <:action :let={reminder}> --%>
+  <%!--     <.link href={~p"/reminders/#{reminder}"} method="delete" data-confirm="Are you sure?"> --%>
+  <%!--       Delete --%>
+  <%!--     </.link> --%>
+  <%!--   </:action> --%>
+  <%!-- </.table> --%>
+</Layouts.app>

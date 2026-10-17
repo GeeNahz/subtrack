@@ -1,0 +1,21 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <.header>
+    Reminder {@reminder.id}
+    <:subtitle>This is a reminder record from your database.</:subtitle>
+    <:actions>
+      <%!-- <.button navigate={~p"/reminders"}> --%>
+      <%!--   <.icon name="hero-arrow-left" /> --%>
+      <%!-- </.button> --%>
+      <%!-- <.button variant="primary" navigate={~p"/reminders/#{@reminder}/edit?return_to=show"}> --%>
+      <%!--   <.icon name="hero-pencil-square" /> Edit reminder --%>
+      <%!-- </.button> --%>
+    </:actions>
+  </.header>
+
+  <.list>
+    <:item title="Days before">{@reminder.days_before}</:item>
+    <:item title="Send at">{@reminder.send_at}</:item>
+    <:item title="Channels">{@reminder.channels}</:item>
+    <:item title="Enabled">{@reminder.enabled}</:item>
+  </.list>
+</Layouts.app>

@@ -49,4 +49,24 @@
     <:item title="Manage url">{@subscription.manage_url}</:item>
     <:item title="Notes">{@subscription.notes}</:item>
   </.list>
+
+  <h2 class="text-lg font-semibold mt-8">Reminders</h2>
+  <p :if={@reminders == []} class="opacity-0">No reminders yet.</p>
+  <ul>
+    <li :for={r <- @reminders} class="py-2 flex justify-between gap-4">
+      <span>
+        {reminder_summary(r)} * {Enum.join(r.channels, ", ")}
+        <span :if={!r.enabled} class="opacity-60">(disabled)</span>
+      </span>
+      <span class="space-x-3">
+        <.link href={~p"/subscriptions/#{@subscription}/reminders/#{r}/edit"}>Edit</.link>
+        <.link
+          href={~p"/subscriptions/#{@subscription}/reminders/#{r}"}
+          method="delete"
+          data-confirm="Delete this reminder?"
+        >Delete</.link>
+      </span>
+    </li>
+  </ul>
+  <.link href={~p"/subscriptions/#{@subscription}/reminders/new"}>Add reminder</.link>
 </Layouts.app>

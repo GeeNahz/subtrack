@@ -20,8 +20,10 @@ defmodule Subtrack.Subscriptions.Subscription do
     field :status, Ecto.Enum, values: [:active, :paused, :cancelled], default: :active
     field :manage_url, :string
     field :notes, :string
-    belongs_to :payment_method, Subtrack.Subscriptions.PaymentMethod
+
     field :user_id, :binary_id
+    belongs_to :payment_method, Subtrack.Subscriptions.PaymentMethod
+    has_many :reminders, Subtrack.Subscriptions.Reminder
 
     timestamps(type: :utc_datetime)
   end

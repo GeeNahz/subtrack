@@ -46,4 +46,23 @@ defmodule Subtrack.SubscriptionsFixtures do
     {:ok, subscription} = Subtrack.Subscriptions.create_subscription(scope, attrs)
     Subtrack.Repo.preload(subscription, :payment_method)
   end
+
+  @doc """
+  Generate a reminder.
+  """
+  def reminder_fixture(scope, attrs \\ %{}) do
+    {subscription, attrs} = Map.pop(attrs, :subscription)
+    subscription = subscription || subscription_fixture(scope)
+
+    attrs =
+      Enum.into(attrs, %{
+        channels: [:email],
+        days_before: 42,
+        enabled: true,
+        send_at: ~T[14:00:00]
+      })
+
+    {:ok, reminder} = Subtrack.Subscriptions.create_reminder(scope, subscription, attrs)
+    reminder
+  end
 end

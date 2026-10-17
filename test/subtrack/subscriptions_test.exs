@@ -353,4 +353,175 @@ defmodule Subtrack.SubscriptionsTest do
       assert Subscription.estimated_card_charge(sub) == nil
     end
   end
+
+  describe "reminders" do
+    alias Subtrack.Subscriptions.Reminder
+
+    import Subtrack.AccountsFixtures, only: [user_scope_fixture: 0]
+    import Subtrack.SubscriptionsFixtures
+
+    @invalid_attrs %{enabled: nil, days_before: nil, send_at: nil, channels: nil}
+
+    test "list_reminders/1 returns all scoped reminders" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+      other_subscription = subscription_fixture(other_scope)
+      reminder = reminder_fixture(scope, %{subscription: subscription})
+      other_reminder = reminder_fixture(other_scope, %{subscription: other_subscription})
+      assert Subscriptions.list_reminders(scope, subscription) == [reminder]
+      assert Subscriptions.list_reminders(other_scope, other_subscription) == [other_reminder]
+    end
+
+    test "get_reminder!/2 returns the reminder with given id" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+      reminder = reminder_fixture(scope, %{subscription: subscription})
+      other_scope = user_scope_fixture()
+      other_subscription = subscription_fixture(other_scope)
+      assert Subscriptions.get_reminder!(scope, subscription, reminder.id) == reminder
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Subscriptions.get_reminder!(other_scope, other_subscription, reminder.id)
+      end
+    end
+
+    test "create_reminder/2 with valid data creates a reminder" do
+      valid_attrs = %{
+        enabled: true,
+        days_before: 42,
+        send_at: ~T[14:00:00],
+        channels: [:email]
+      }
+
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+
+      assert {:ok, %Reminder{} = reminder} =
+               Subscriptions.create_reminder(scope, subscription, valid_attrs)
+
+      assert reminder.enabled == true
+      assert reminder.days_before == 42
+      assert reminder.send_at == ~T[14:00:00]
+      assert reminder.channels == [:email]
+      assert reminder.subscription_id == subscription.id
+      assert reminder.user_id == scope.user.id
+    end
+
+    test "create_reminder/2 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Subscriptions.create_reminder(scope, subscription, @invalid_attrs)
+    end
+
+    test "update_reminder/3 with valid data updates the reminder" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+      reminder = reminder_fixture(scope, %{subscription: subscription})
+
+      update_attrs = %{
+        enabled: false,
+        days_before: 43,
+        send_at: ~T[15:01:01],
+        channels: [:sms]
+      }
+
+      assert {:ok, %Reminder{} = reminder} =
+               Subscriptions.update_reminder(scope, reminder, update_attrs)
+
+      assert reminder.enabled == false
+      assert reminder.days_before == 43
+      assert reminder.send_at == ~T[15:01:01]
+      assert reminder.channels == [:sms]
+    end
+
+    test "update_reminder/3 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+      reminder = reminder_fixture(scope, %{subscription: subscription})
+
+      assert_raise MatchError, fn ->
+        Subscriptions.update_reminder(other_scope, reminder, %{})
+      end
+    end
+
+    test "update_reminder/3 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+      reminder = reminder_fixture(scope, %{subscription: subscription})
+
+      assert {:error, %Ecto.Changeset{}} =
+               Subscriptions.update_reminder(scope, reminder, @invalid_attrs)
+
+      assert reminder == Subscriptions.get_reminder!(scope, subscription, reminder.id)
+    end
+
+    test "delete_reminder/2 deletes the reminder" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+      reminder = reminder_fixture(scope, %{subscription: subscription})
+      assert {:ok, %Reminder{}} = Subscriptions.delete_reminder(scope, reminder)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Subscriptions.get_reminder!(scope, subscription, reminder.id)
+      end
+    end
+
+    test "delete_reminder/2 with invalid scope raises" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+      other_scope = user_scope_fixture()
+      reminder = reminder_fixture(scope, %{subscription: subscription})
+      assert_raise MatchError, fn -> Subscriptions.delete_reminder(other_scope, reminder) end
+    end
+
+    test "change_reminder/2 returns a reminder changeset" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+      reminder = reminder_fixture(scope, %{subscription: subscription})
+      assert %Ecto.Changeset{} = Subscriptions.change_reminder(scope, reminder)
+    end
+
+    test "create_reminder/3 rejects a duplicate rule" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+      attrs = %{days_before: 5, send_at: ~T[10:00:00], channels: [:email]}
+
+      assert {:ok, _} = Subscriptions.create_reminder(scope, subscription, attrs)
+      assert {:error, changeset} = Subscriptions.create_reminder(scope, subscription, attrs)
+      assert %{days_before: ["you already have a reminder at that time"]} = errors_on(changeset)
+      # assert_raise Ecto.ConstraintError, fn ->
+      #   Subscriptions.create_reminder(scope, subscription, attrs)
+      # end
+    end
+
+    test "create_reminder/3 requires a channel and a sane date range" do
+      scope = user_scope_fixture()
+      subscription = subscription_fixture(scope)
+
+      assert {:error, changeset} =
+               Subscriptions.create_reminder(scope, subscription, %{
+                 days_before: 91,
+                 send_at: ~T[09:00:00],
+                 channels: []
+               })
+
+      assert %{days_before: [_], channels: [_]} = errors_on(changeset)
+    end
+
+    test "create_reminder/3 crashes for someone else's subscription" do
+      other_subscription = subscription_fixture(user_scope_fixture())
+
+      assert_raise MatchError, fn ->
+        Subscriptions.create_reminder(user_scope_fixture(), other_subscription, %{
+          days_before: 1,
+          send_at: ~T[08:00:00],
+          channels: [:sms]
+        })
+      end
+    end
+  end
 end
