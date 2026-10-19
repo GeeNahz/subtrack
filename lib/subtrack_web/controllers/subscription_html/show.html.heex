@@ -50,23 +50,32 @@
     <:item title="Notes">{@subscription.notes}</:item>
   </.list>
 
-  <h2 class="text-lg font-semibold mt-8">Reminders</h2>
-  <p :if={@reminders == []} class="opacity-0">No reminders yet.</p>
-  <ul>
-    <li :for={r <- @reminders} class="py-2 flex justify-between gap-4">
-      <span>
-        {reminder_summary(r)} * {Enum.join(r.channels, ", ")}
-        <span :if={!r.enabled} class="opacity-60">(disabled)</span>
-      </span>
-      <span class="space-x-3">
-        <.link href={~p"/subscriptions/#{@subscription}/reminders/#{r}/edit"}>Edit</.link>
-        <.link
-          href={~p"/subscriptions/#{@subscription}/reminders/#{r}"}
-          method="delete"
-          data-confirm="Delete this reminder?"
-        >Delete</.link>
-      </span>
-    </li>
-  </ul>
-  <.link href={~p"/subscriptions/#{@subscription}/reminders/new"}>Add reminder</.link>
+  <fieldset class="border border-gray-500 rounded-md p-4">
+    <legend class="font-semibold">Reminders</legend>
+    <p :if={@reminders == []} class="opacity-30">No reminders yet.</p>
+    <ul class="divide divide-y">
+      <li :for={r <- @reminders} class="py-2 flex justify-between gap-4">
+        <div class={"#{if !r.enabled, do: "opacity-70"} flex flex-col gap-1"}>
+          <p class="w-full">{reminder_summary(r)} * {Enum.join(r.channels, ", ")}</p>
+          <p :if={String.length(to_string(r.note)) > 0} class="text-xs w-full">- {r.note}</p>
+          <p :if={!r.enabled} class="opacity-60 text-sm italic">(disabled)</p>
+        </div>
+
+        <span class="space-x-3 text-sm">
+          <.link
+            href={~p"/subscriptions/#{@subscription}/reminders/#{r}/edit"}
+            class="hover:text-primary"
+          >Edit</.link>
+          <.link
+            href={~p"/subscriptions/#{@subscription}/reminders/#{r}"}
+            class="hover:text-red-500"
+            method="delete"
+            data-confirm="Delete this reminder?"
+          >Delete</.link>
+        </span>
+      </li>
+    </ul>
+  </fieldset>
+  <%!-- <.link href={~p"/subscriptions/#{@subscription}/reminders/new"}>Add reminder</.link> --%>
+  <.button navigate={~p"/subscriptions/#{@subscription}/reminders/new"}>Add reminder</.button>
 </Layouts.app>

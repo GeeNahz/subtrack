@@ -26,6 +26,9 @@ config :subtrack, SubtrackWeb.Endpoint,
 # In test we don't send emails
 config :subtrack, Subtrack.Mailer, adapter: Swoosh.Adapters.Test
 
+# Configure Oban for tests
+config :subtrack, Oban, testing: :manual, queues: false, plugins: false
+
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
 

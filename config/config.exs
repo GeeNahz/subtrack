@@ -35,6 +35,18 @@ config :subtrack, SubtrackWeb.Endpoint,
   pubsub_server: Subtrack.PubSub,
   live_view: [signing_salt: "axw+o/JS"]
 
+# Configure Oban
+config :subtrack, Oban,
+  repo: Subtrack.Repo,
+  queues: [default: 5, notifications: 10],
+  plugins: [
+    {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
+    {Oban.Plugins.Cron,
+     crontab: [
+       {"*/15 * * * *", Subtrack.Workers.EnqueueDueReminders}
+     ]}
+  ]
+
 # Configure LiveView
 config :phoenix_live_view,
   # the attribute set on all root tags. Used for Phoenix.LiveView.ColocatedCSS.

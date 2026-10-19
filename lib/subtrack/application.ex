@@ -10,6 +10,7 @@ defmodule Subtrack.Application do
     children = [
       SubtrackWeb.Telemetry,
       Subtrack.Repo,
+      {Oban, Application.fetch_env!(:subtrack, Oban)},
       {DNSCluster, query: Application.get_env(:subtrack, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Subtrack.PubSub},
       # Start a worker by calling: Subtrack.Worker.start_link(arg)

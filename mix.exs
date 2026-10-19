@@ -67,7 +67,8 @@ defmodule Subtrack.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
-      {:tzdata, "~> 1.2"}
+      {:tzdata, "~> 1.2"},
+      {:oban, "~> 2.23"}
     ]
   end
 
