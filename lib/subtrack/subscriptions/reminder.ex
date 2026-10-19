@@ -7,7 +7,11 @@ defmodule Subtrack.Subscriptions.Reminder do
   schema "reminders" do
     field :days_before, :integer
     field :send_at, :time, default: ~T[09:00:00]
-    field :channels, {:array, Ecto.Enum}, values: [:email, :sms], default: [:email]
+
+    field :channels, {:array, Ecto.Enum},
+      values: Subtrack.Notifications.Channels.all(),
+      default: [:email]
+
     field :enabled, :boolean, default: true
     field :user_id, :binary_id
     field :note, :string
