@@ -3,7 +3,7 @@
     field={f[:days_before]}
     type="number"
     min="0"
-    max="90"
+    max={Subtrack.Subscriptions.Reminder.max_days_before()}
     label="Days before renewal (0 = on the day)"
   />
   <.input field={f[:send_at]} type="time" label="Send at (your timezone)" />
