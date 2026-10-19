@@ -4,6 +4,8 @@ defmodule Subtrack.Notifications.Schedule do
   """
   @grace_seconds 6 * 60 * 60
 
+  def grace_seconds, do: @grace_seconds
+
   @doc """
   The UTC moment a reminder should fire for a given renewal date.
   """
