@@ -26,7 +26,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Notifications.Schedule`, which works out each reminder's UTC due time from the user's timezone (handles DST gaps and overlaps) and drops reminders more than 6 hours late.
 - `Workers.EnqueueDueReminders` cron sweeper (every 15 minutes) and `Workers.SendReminder` (up to 5 attempts). Sending skips a reminder if it was disabled, the subscription is inactive, or the renewal date changed.
 - Stub `Notifications.Dispatcher`, which logs email/SMS reminders instead of sending them.
+- Email reminder delivery: `Notifications.ReminderEmail` builds a plain-text reminder (renewal date, total with plan/fee split, estimated card debit, card label, optional note, link to `/subscriptions/:id`) addressed to the user's first name.
+- Production mailer on the Resend adapter, configured from `RESEND_API_KEY` and `MAIL_FROM_ADDRESS` in `config/runtime.exs`, with a `:mail_from` sender setting (default `reminders@localhost`) and a `.env.sample`; `.env` files are now git-ignored.
+- `Dispatcher.classify_email_error/1`, which treats 4xx responses (except 408 and 429) as permanent and everything else as retryable.
+- `Accounts.get_user_with_profile!/1`, which loads a user with their profile preloaded.
+- `Subtrack.Money.format/2` for `"NGN 1500.00"`-style amounts.
+- Public `Reminder.max_days_before/0`, `Reminder.max_note_length/0` and `Schedule.grace_seconds/0`, so limits are defined in one place.
 
 ### Changed
 - Subscription detail page lists the subscription's reminders, with their notes.
 - Reminder and delivery channel options now come from a single `Notifications.Channels.all/0` list (`email`, `sms`), not hard-coded lists.
+- `Dispatcher.deliver/4` sends the `email` channel through `Swoosh` (the `sms` channel is still a logging stub); it returns `{:ok, ref}`, `{:error, reason}` for retryable failures, or `{:permanent, reason}`.
+- `Workers.SendReminder` records `{:permanent, reason}` as a final failure and cancels the job instead of retrying, and loads the user with their profile.
+- `Notifications.get_delivery/1` also preloads the subscription's payment method.
+- `Accounts.UserNotifier` takes its sender from the `:mail_from` setting instead of `contact@example.com`.
+- Reminder form's "days before" input takes its `max` from `Reminder.max_days_before/0` instead of a hard-coded 90.
+- `PaymentMethod.label/1` now renders the card as `Name **1234 (CUR)` (no space after the asterisks).
+- `SubscriptionHTML.money/2` delegates to `Subtrack.Money.format/2`.
