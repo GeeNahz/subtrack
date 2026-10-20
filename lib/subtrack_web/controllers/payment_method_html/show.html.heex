@@ -6,7 +6,10 @@
       <.button navigate={~p"/payment_methods"}>
         <.icon name="hero-arrow-left" />
       </.button>
-      <.button variant="primary" navigate={~p"/payment_methods/#{@payment_method}/edit?return_to=show"}>
+      <.button
+        variant="primary"
+        navigate={~p"/payment_methods/#{@payment_method}/edit?return_to=show"}
+      >
         <.icon name="hero-pencil-square" /> Edit payment_method
       </.button>
     </:actions>

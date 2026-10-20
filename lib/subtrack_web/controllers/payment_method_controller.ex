@@ -44,7 +44,11 @@ defmodule SubtrackWeb.PaymentMethodController do
   def update(conn, %{"id" => id, "payment_method" => payment_method_params}) do
     payment_method = Subscriptions.get_payment_method!(conn.assigns.current_scope, id)
 
-    case Subscriptions.update_payment_method(conn.assigns.current_scope, payment_method, payment_method_params) do
+    case Subscriptions.update_payment_method(
+           conn.assigns.current_scope,
+           payment_method,
+           payment_method_params
+         ) do
       {:ok, payment_method} ->
         conn
         |> put_flash(:info, "Payment method updated successfully.")
@@ -57,7 +61,9 @@ defmodule SubtrackWeb.PaymentMethodController do
 
   def delete(conn, %{"id" => id}) do
     payment_method = Subscriptions.get_payment_method!(conn.assigns.current_scope, id)
-    {:ok, _payment_method} = Subscriptions.delete_payment_method(conn.assigns.current_scope, payment_method)
+
+    {:ok, _payment_method} =
+      Subscriptions.delete_payment_method(conn.assigns.current_scope, payment_method)
 
     conn
     |> put_flash(:info, "Payment method deleted successfully.")

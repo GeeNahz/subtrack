@@ -4,5 +4,9 @@
     <:subtitle>Use this form to manage payment_method records in your database.</:subtitle>
   </.header>
 
-  <.payment_method_form changeset={@changeset} action={~p"/payment_methods"} return_to={~p"/payment_methods"} />
+  <.payment_method_form
+    changeset={@changeset}
+    action={~p"/payment_methods"}
+    return_to={~p"/payment_methods"}
+  />
 </Layouts.app>

@@ -8,7 +8,11 @@
     </:actions>
   </.header>
 
-  <.table id="payment_methods" rows={@payment_methods} row_click={&JS.navigate(~p"/payment_methods/#{&1}")}>
+  <.table
+    id="payment_methods"
+    rows={@payment_methods}
+    row_click={&JS.navigate(~p"/payment_methods/#{&1}")}
+  >
     <:col :let={payment_method} label="Nickname">{payment_method.nickname}</:col>
     <:col :let={payment_method} label="Brand">{payment_method.brand}</:col>
     <:col :let={payment_method} label="Card mode">{payment_method.card_mode}</:col>
@@ -24,7 +28,11 @@
       <.link navigate={~p"/payment_methods/#{payment_method}/edit"}>Edit</.link>
     </:action>
     <:action :let={payment_method}>
-      <.link href={~p"/payment_methods/#{payment_method}"} method="delete" data-confirm="Are you sure?">
+      <.link
+        href={~p"/payment_methods/#{payment_method}"}
+        method="delete"
+        data-confirm="Are you sure?"
+      >
         Delete
       </.link>
     </:action>
