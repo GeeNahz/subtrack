@@ -60,6 +60,25 @@ defmodule Subtrack.Accounts do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  @doc """
+  Gets a single user with their profile preloaded.
+
+  Raises `Ecto.NoResultsError` if the User does not exist.
+
+  ## Examples
+
+      iex> get_user_with_profile!(123)
+      %User{profile: %Subtrack.Accounts.Profile{}}
+
+      iex> get_user_with_profile!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  # Load user with their profile
+  def get_user_with_profile!(id) do
+    User |> Repo.get!(id) |> Repo.preload(:profile)
+  end
+
   ## User registration
 
   @doc """

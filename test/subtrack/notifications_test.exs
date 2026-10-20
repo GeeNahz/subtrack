@@ -46,6 +46,8 @@ defmodule Subtrack.NotificationsTest do
 
     assert :ok = perform_job(SendReminder, job.args)
     assert Notifications.get_delivery(job.args["delivery_id"]).status == :sent
+    assert_received {:email, %Swoosh.Email{subject: "some name renews in 5 days"} = email}
+    assert email.text_body =~ "Amount: GBP 241.00"
   end
 
   test "the worker skips a reminder disabled after it was claimed", %{reminder: reminder} do

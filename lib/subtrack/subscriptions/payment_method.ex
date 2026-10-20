@@ -50,6 +50,6 @@ defmodule Subtrack.Subscriptions.PaymentMethod do
 
   def label(%__MODULE__{} = pm) do
     name = pm.nickname || pm.bank_name || String.upcase(to_string(pm.brand))
-    "#{name} ** #{pm.last4} (#{pm.currency})"
+    "#{name} **#{pm.last4} (#{pm.currency})"
   end
 end

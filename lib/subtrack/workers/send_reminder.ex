@@ -20,12 +20,16 @@ defmodule Subtrack.Workers.SendReminder do
       Notifications.mark_skipped(delivery, "reminder or subscription changed")
       :ok
     else
-      user = Accounts.get_user!(subscription.user_id)
+      user = Accounts.get_user_with_profile!(subscription.user_id)
 
       case Dispatcher.deliver(delivery.channel, reminder, subscription, user) do
         {:ok, provider_ref} ->
           Notifications.mark_sent(delivery, provider_ref)
           :ok
+
+        {:permanent, reason} ->
+          Notifications.record_failure(delivery, reason, true)
+          {:cancel, reason}
 
         {:error, reason} ->
           final? = job.attempt >= job.max_attempts

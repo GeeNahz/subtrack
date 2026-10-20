@@ -9,7 +9,7 @@ defmodule Subtrack.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Subtrack", "contact@example.com"})
+      |> from(Application.fetch_env!(:subtrack, :mail_from))
       |> subject(subject)
       |> text_body(body)
 

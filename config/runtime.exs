@@ -68,6 +68,12 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
+  config :subtrack, Subtrack.Mailer,
+    adapter: Swoosh.Adapters.Resend,
+    api_key: System.fetch_env!("RESEND_API_KEY")
+
+  config :subtrack, :mail_from, {"Subtrack", System.fetch_env!("MAIL_FROM_ADDRESS")}
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key

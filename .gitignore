@@ -35,3 +35,7 @@ subtrack-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# env
+.env
+.env.*
+!.env.sample

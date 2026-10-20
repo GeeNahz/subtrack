@@ -16,11 +16,7 @@ defmodule SubtrackWeb.SubscriptionHTML do
 
   def subscription_form(assigns)
 
-  def money(nil, _currency), do: "-"
-
-  def money(%Decimal{} = amount, currency) do
-    "#{currency} #{amount |> Decimal.round(2) |> Decimal.to_string(:normal)}"
-  end
+  def money(amount, currency), do: Subtrack.Money.format(amount, currency)
 
   def reminder_summary(%{days_before: 0, send_at: t}), do: "On the day, at #{time(t)}"
 

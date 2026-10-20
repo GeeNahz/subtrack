@@ -99,7 +99,7 @@ defmodule Subtrack.Notifications do
   def get_delivery(id) do
     ReminderDelivery
     |> Repo.get(id)
-    |> Repo.preload(reminder: :subscription)
+    |> Repo.preload(reminder: [subscription: :payment_method])
   end
 
   def mark_sent(%ReminderDelivery{} = delivery, provider_ref) do
