@@ -43,3 +43,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reminder form's "days before" input takes its `max` from `Reminder.max_days_before/0` instead of a hard-coded 90.
 - `PaymentMethod.label/1` now renders the card as `Name **1234 (CUR)` (no space after the asterisks).
 - `SubscriptionHTML.money/2` delegates to `Subtrack.Money.format/2`.
+- `PaymentMethodController` and the `payment_method_html` templates (`index`, `new`, `edit`, `show`) are reformatted with `mix format`, with no behaviour change.
