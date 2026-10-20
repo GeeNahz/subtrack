@@ -28,8 +28,12 @@
     type="select"
     label="Billing cycle"
     prompt="Choose a value"
-    options={Ecto.Enum.values(Subtrack.Subscriptions.Subscription, :billing_cycle)}
+    options={
+      for c <- Subtrack.Subscriptions.BillingCycles.all(),
+          do: {Subtrack.Subscriptions.BillingCycles.label(c), c}
+    }
   />
+  <%!-- options={Ecto.Enum.values(Subtrack.Subscriptions.Subscription, :billing_cycle)} --%>
   <.input field={f[:next_renewal_on]} type="date" label="Next renewal on" />
   <.input
     field={f[:status]}

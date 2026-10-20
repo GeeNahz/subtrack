@@ -43,7 +43,8 @@ config :subtrack, Oban,
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
     {Oban.Plugins.Cron,
      crontab: [
-       {"*/15 * * * *", Subtrack.Workers.EnqueueDueReminders}
+       {"*/15 * * * *", Subtrack.Workers.EnqueueDueReminders},
+       {"10 */6 * * *", Subtrack.Workers.RollRenewals}
      ]}
   ]
 

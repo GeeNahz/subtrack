@@ -4,7 +4,7 @@ defmodule Subtrack.Subscriptions.Subscription do
 
   import Ecto.Query
   alias Subtrack.Repo
-  alias Subtrack.Subscriptions.PaymentMethod
+  alias Subtrack.Subscriptions.{PaymentMethod, BillingCycles}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -15,7 +15,8 @@ defmodule Subtrack.Subscriptions.Subscription do
     field :fee_amount, :decimal, default: Decimal.new(0)
     field :currency, :string
     field :fx_rate, :decimal
-    field :billing_cycle, Ecto.Enum, values: [:weekly, :monthly, :quarterly, :yearly]
+    field :billing_cycle, Ecto.Enum, values: BillingCycles.all()
+    field :billing_anchor_on, :date
     field :next_renewal_on, :date
     field :status, Ecto.Enum, values: [:active, :paused, :cancelled], default: :active
     field :manage_url, :string
@@ -58,6 +59,7 @@ defmodule Subtrack.Subscriptions.Subscription do
     |> validate_number(:fee_amount, greater_than_or_equal_to: 0)
     |> validate_number(:fx_rate, greater_than: 0)
     |> validate_payment_method_owner(user_scope)
+    |> sync_anchor()
     |> put_change(:user_id, user_scope.user.id)
   end
 
@@ -90,4 +92,18 @@ defmodule Subtrack.Subscriptions.Subscription do
   end
 
   def estimated_card_charge(_), do: nil
+
+  defp sync_anchor(changeset) do
+    date_changed? = Map.has_key?(changeset.changes, :next_renewal_on)
+    cycle_changed? = Map.has_key?(changeset.changes, :billing_cycle)
+    missing? = is_nil(get_field(changeset, :billing_anchor_on))
+
+    case get_field(changeset, :next_renewal_on) do
+      %Date{} = date when date_changed? or cycle_changed? or missing? ->
+        put_change(changeset, :billing_anchor_on, date)
+
+      _ ->
+        changeset
+    end
+  end
 end

@@ -11,7 +11,10 @@
   <fieldset class="mb-2">
     <legend class="label mb-1">Send via</legend>
     <%!-- <label :for={ch <- Subtrack.Notifications.Channels.all()} class="label mr-4"> --%>
-    <label :for={ch <- Ecto.Enum.values(Reminder, :channels)} class="label mr-4">
+    <label
+      :for={ch <- Ecto.Enum.values(Subtrack.Subscriptions.Reminder, :channels)}
+      class="label mr-4"
+    >
       <input
         type="checkbox"
         name="reminder[channels][]"

@@ -20,7 +20,9 @@
 
     <:col :let={subscription} label="Billing currency">{subscription.currency}</:col>
     <:col :let={subscription} label="Exchange rate">{subscription.fx_rate}</:col>
-    <:col :let={subscription} label="Billing cycle">{subscription.billing_cycle}</:col>
+    <:col :let={subscription} label="Billing cycle">
+      {Subtrack.Subscriptions.BillingCycles.label(subscription.billing_cycle)}
+    </:col>
     <:col :let={subscription} label="Next renewal on">{subscription.next_renewal_on}</:col>
     <:col :let={subscription} label="Status">{subscription.status}</:col>
     <%!-- <:col :let={subscription} label="Manage url">{subscription.manage_url}</:col> --%>

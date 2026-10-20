@@ -43,7 +43,9 @@
     >
       {@subscription.fx_rate}
     </:item>
-    <:item title="Billing cycle">{@subscription.billing_cycle}</:item>
+    <:item title="Billing cycle">
+      {Subtrack.Subscriptions.BillingCycles.label(@subscription.billing_cycle)}
+    </:item>
     <:item title="Next renewal on">{@subscription.next_renewal_on}</:item>
     <:item title="Status">{@subscription.status}</:item>
     <:item title="Manage url">{@subscription.manage_url}</:item>
