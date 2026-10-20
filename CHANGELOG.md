@@ -32,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Accounts.get_user_with_profile!/1`, which loads a user with their profile preloaded.
 - `Subtrack.Money.format/2` for `"NGN 1500.00"`-style amounts.
 - Public `Reminder.max_days_before/0`, `Reminder.max_note_length/0` and `Schedule.grace_seconds/0`, so limits are defined in one place.
+- `Subscriptions.BillingCycles`, the single list of billing cycles (`weekly`, `monthly`, `quarterly`, `yearly`) with display labels and date maths: occurrences are always computed from an anchor date, so month-end dates clamp (31 Jan → 28 Feb) without drifting (→ 31 Mar).
+- `billing_anchor_on` column on `subscriptions` (backfilled from `next_renewal_on`, then `NOT NULL`); it is reset whenever the renewal date or billing cycle is edited.
+- `Subscriptions.Renewals` and the `Workers.RollRenewals` cron job (minute 10 of every 6th hour), which move an active subscription's `next_renewal_on` to the next cycle date once the user's local date is more than a day past it. The update is guarded on the old date, so a concurrent user edit wins.
 
 ### Changed
 - Subscription detail page lists the subscription's reminders, with their notes.
@@ -44,3 +47,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PaymentMethod.label/1` now renders the card as `Name **1234 (CUR)` (no space after the asterisks).
 - `SubscriptionHTML.money/2` delegates to `Subtrack.Money.format/2`.
 - `PaymentMethodController` and the `payment_method_html` templates (`index`, `new`, `edit`, `show`) are reformatted with `mix format`, with no behaviour change.
+- Subscription form, list and detail page show billing cycles as labels (`Monthly`) from `BillingCycles`, and `Subscription.billing_cycle` takes its values from `BillingCycles.all/0`.
+- Reminder form references `Subtrack.Subscriptions.Reminder` by its full module name.
