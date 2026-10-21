@@ -154,13 +154,27 @@ defmodule Subtrack.Accounts.User do
   def contact_changeset(user, attrs) do
     user
     |> cast(attrs, [:phone_number, :timezone])
+    |> update_change(:phone_number, &normalize_phone/1)
     |> validate_required(:timezone)
     |> validate_format(:phone_number, ~r/^\+[1-9]\d{6,14}$/,
       message: "use international format, e.g. +2348012345678"
     )
-    |> validate_change(:timezone, fn :timezone, tz ->
-      if Tzdata.zone_exists?(tz), do: [], else: [timezone: "is not a valid timezone"]
+    |> validate_change(:timezone, fn :timezone, zone ->
+      if Subtrack.Timezones.valid?(zone), do: [], else: [timezone: "is not a valid timezone"]
     end)
     |> unique_constraint(:phone_number)
+    |> reset_phone_confirmation()
+  end
+
+  defp normalize_phone(nil), do: nil
+  defp normalize_phone(phone), do: String.replace(phone, ~r/[\s\-().]/, "")
+
+  # A different phone number means the old verification no longer applies
+  defp reset_phone_confirmation(changeset) do
+    if Map.has_key?(changeset.changes, :phone_number) do
+      put_change(changeset, :phone_confirmed_at, nil)
+    else
+      changeset
+    end
   end
 end

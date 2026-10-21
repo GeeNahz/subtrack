@@ -407,4 +407,63 @@ defmodule Subtrack.AccountsTest do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
     end
   end
+
+  describe "contact_changeset/2" do
+    alias Subtrack.Accounts.User
+
+    test "normalises the phone number and validates the timezone" do
+      cs =
+        User.contact_changeset(%User{}, %{
+          "phone_number" => "+234 801-234-5678",
+          "timezone" => "Africa/Lagos"
+        })
+
+      assert cs.valid?
+      assert cs.changes.phone_number == "+2348012345678"
+    end
+
+    test "rejects a bad phone number and a bad timezone" do
+      cs =
+        User.contact_changeset(%User{}, %{
+          "phone_number" => "08012345678",
+          "timezone" => "Mars/Olympus"
+        })
+
+      refute cs.valid?
+      assert %{phone_number: [_], timezone: [_]} = errors_on(cs)
+    end
+
+    test "changing the number revokes verification, other edits keep it" do
+      user = %User{
+        phone_number: "+2348012345678",
+        phone_confirmed_at: ~U[2026-10-01 00:00:00Z],
+        timezone: "Africa/Lagos"
+      }
+
+      changed = User.contact_changeset(user, %{"phone_number" => "+2348099999999"})
+      assert Map.has_key?(changed.changes, :phone_confirmed_at)
+      assert changed.changes.phone_confirmed_at == nil
+
+      kept = User.contact_changeset(user, %{"timezone" => "Europe/London"})
+      refute Map.has_key?(kept.changes, :phone_confirmed_at)
+    end
+  end
+
+  describe "update_profile/2" do
+    test "updates only the caller's own profile" do
+      scope = user_scope_fixture()
+      other = user_scope_fixture()
+
+      assert {:ok, profile} = Accounts.update_profile(scope, %{"first_name" => "Ada"})
+      assert profile.first_name == "Ada"
+      assert profile.user_id == scope.user.id
+      assert Accounts.get_profile!(other).first_name != "Ada"
+    end
+
+    test "requires a first name" do
+      scope = user_scope_fixture()
+      assert {:error, cs} = Accounts.update_profile(scope, %{"first_name" => ""})
+      assert %{first_name: [_]} = errors_on(cs)
+    end
+  end
 end

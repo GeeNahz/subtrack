@@ -1,0 +1,26 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <.header>Settings</.header>
+  <.settings_nav current={:contact} />
+
+  <.form :let={f} for={@form} action={~p"/settings/contact"} method="put">
+    <.input
+      field={f[:timezone]}
+      type="select"
+      label="Timezone"
+      options={Subtrack.Timezones.options()}
+    />
+    <.input
+      field={f[:phone_number]}
+      type="tel"
+      label="Mobile number (international format, optional)"
+      placeholder="+2348012345678"
+    />
+    <p
+      :if={@current_scope.user.phone_number && !@current_scope.user.phone_confirmed_at}
+      class="text-sm opacity-70 mb-3"
+    >
+      This number is not verified yet, so we won&apos;t send SMS to it.
+    </p>
+    <.button class="btn btn-primary">Save contact settings</.button>
+  </.form>
+</Layouts.app>

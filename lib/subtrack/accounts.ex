@@ -6,7 +6,7 @@ defmodule Subtrack.Accounts do
   import Ecto.Query, warn: false
   alias Subtrack.Repo
 
-  alias Subtrack.Accounts.{User, UserToken, UserNotifier}
+  alias Subtrack.Accounts.{User, UserToken, UserNotifier, Profile, Scope}
 
   ## Database getters
 
@@ -317,5 +317,28 @@ defmodule Subtrack.Accounts do
         {:ok, {user, tokens_to_expire}}
       end
     end)
+  end
+
+  ## Profile
+
+  def get_profile!(%Scope{} = scope), do: Repo.get_by!(Profile, user_id: scope.user.id)
+
+  def change_profile(%Profile{} = profile, attrs \\ %{}), do: Profile.changeset(profile, attrs)
+
+  def update_profile(%Scope{} = scope, attrs) do
+    scope
+    |> get_profile!()
+    |> Profile.changeset(attrs)
+    |> Repo.update()
+  end
+
+  ## Contact details
+
+  def change_user_contact(%User{} = user, attrs \\ %{}), do: User.contact_changeset(user, attrs)
+
+  def update_user_contact(%Scope{user: user}, attrs) do
+    user
+    |> User.contact_changeset(attrs)
+    |> Repo.update()
   end
 end

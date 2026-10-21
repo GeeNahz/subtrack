@@ -61,6 +61,11 @@ defmodule SubtrackWeb.Router do
     get "/users/settings", UserSettingsController, :edit
     put "/users/settings", UserSettingsController, :update
     get "/users/settings/confirm-email/:token", UserSettingsController, :confirm_email
+
+    get "/settings/profile", ProfileSettingsController, :edit
+    put "/settings/profile", ProfileSettingsController, :update
+    get "/settings/contact", ContactSettingsController, :edit
+    put "/settings/contact", ContactSettingsController, :update
   end
 
   # Rest of app

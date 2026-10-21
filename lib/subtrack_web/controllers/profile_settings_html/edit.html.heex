@@ -1,0 +1,11 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <.header>Settings</.header>
+  <.settings_nav current={:profile} />
+
+  <.form :let={f} for={@form} action={~p"/settings/profile"} method="put">
+    <.input field={f[:first_name]} type="text" label="First name" required />
+    <.input field={f[:last_name]} type="text" label="Last name" required />
+    <.input field={f[:username]} type="text" label="Username" />
+    <.button class="btn btn-primary">Save profile</.button>
+  </.form>
+</Layouts.app>
