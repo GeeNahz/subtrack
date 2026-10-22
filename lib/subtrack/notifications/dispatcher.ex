@@ -9,7 +9,8 @@ defmodule Subtrack.Notifications.Dispatcher do
   require Logger
 
   alias Subtrack.Mailer
-  alias Subtrack.Notifications.ReminderEmail
+  alias Subtrack.SMS
+  alias Subtrack.Notifications.{ReminderEmail, ReminderSms}
 
   def deliver(:email, reminder, subscription, user) do
     reminder
@@ -21,10 +22,17 @@ defmodule Subtrack.Notifications.Dispatcher do
     end
   end
 
-  # Stage 10 replaces this with real SMS sender.
-  def deliver(:sms, _reminder, subscription, user) do
-    Logger.info("[sub] sms reminder: #{subscription.name} -> user #{user.id}")
-    {:ok, "stub-sms-#{Ecto.UUID.generate()}"}
+  def deliver(:sms, reminder, subscription, user) do
+    cond do
+      is_nil(user.phone_number) ->
+        {:permanent, :no_phone_number}
+
+      is_nil(user.phone_confirmed_at) ->
+        {:permanent, :phone_not_verified}
+
+      true ->
+        SMS.deliver(user.phone_number, ReminderSms.build(reminder, subscription))
+    end
   end
 
   @doc false

@@ -1,0 +1,27 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <.header>Verify your number</.header>
+  <.settings_nav current={:contact} />
+
+  <p class="mb-4">
+    Enter the 6-digit code we sent to <strong>{@current_scope.user.phone_number}</strong>
+  </p>
+
+  <.form for={%{}} as={:verification} action={~p"/settings/phone/verify"}>
+    <.input
+      id="verification_code"
+      name="verification[code]"
+      value=""
+      type="text"
+      label="Code"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      maxlength="6"
+      required
+    />
+    <.button class="btn btn-primary">Verify</.button>
+  </.form>
+
+  <.form for={%{}} action={~p"/settings/phone/verify/send"} class="mt-4">
+    <.button class="btn btn-ghost">Send a new code</.button>
+  </.form>
+</Layouts.app>

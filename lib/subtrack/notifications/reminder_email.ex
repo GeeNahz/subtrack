@@ -28,9 +28,10 @@ defmodule Subtrack.Notifications.ReminderEmail do
     "Your #{name} subscription #{when_text(reminder.days_before)}, on #{date}."
   end
 
-  defp when_text(0), do: "renews today"
-  defp when_text(1), do: "renews tomorrow"
-  defp when_text(n), do: "renews in #{n} days"
+  @doc false
+  def when_text(0), do: "renews today"
+  def when_text(1), do: "renews tomorrow"
+  def when_text(n), do: "renews in #{n} days"
 
   defp charge_lines(sub) do
     [

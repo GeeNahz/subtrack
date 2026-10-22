@@ -66,6 +66,11 @@ defmodule SubtrackWeb.Router do
     put "/settings/profile", ProfileSettingsController, :update
     get "/settings/contact", ContactSettingsController, :edit
     put "/settings/contact", ContactSettingsController, :update
+
+    # SMS code verification
+    get "/settings/phone/verify", PhoneVerificationController, :new
+    post "/settings/phone/verify/send", PhoneVerificationController, :send_code
+    post "/settings/phone/verify", PhoneVerificationController, :confirm
   end
 
   # Rest of app

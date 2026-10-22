@@ -65,6 +65,9 @@ config :subtrack, Subtrack.Mailer, adapter: Swoosh.Adapters.Local
 # Mailer "from" email config
 config :subtrack, :mail_from, {"Subtrack", "reminders@localhost"}
 
+# SMS config
+config :subtrack, :sms_adapter, Subtrack.SMS.Log
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",

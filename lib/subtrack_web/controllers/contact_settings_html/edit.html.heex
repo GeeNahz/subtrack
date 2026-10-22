@@ -16,10 +16,16 @@
       placeholder="+2348012345678"
     />
     <p
-      :if={@current_scope.user.phone_number && !@current_scope.user.phone_confirmed_at}
+      :if={@current_scope.user.phone_number}
       class="text-sm opacity-70 mb-3"
     >
-      This number is not verified yet, so we won&apos;t send SMS to it.
+      <p :if={@current_scope.user.phone_confirmed_at}>
+        <span class="text-green-300">✔ Verified</span>. SMS reminders are enabled.
+      </p>
+      <p :if={!@current_scope.user.phone_confirmed_at}>
+        <span class="text-red-600">✘ Not verified</span>, so we won&apos;t send SMS to it.
+        <.link href={~p"/settings/phone/verify"} class="link">Verify this number</.link>
+      </p>
     </p>
     <.button class="btn btn-primary">Save contact settings</.button>
   </.form>

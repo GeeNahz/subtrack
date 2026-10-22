@@ -26,6 +26,9 @@ config :subtrack, SubtrackWeb.Endpoint,
 # In test we don't send emails
 config :subtrack, Subtrack.Mailer, adapter: Swoosh.Adapters.Test
 
+# SMS config
+config :subtrack, :sms_adapter, Subtrack.SMS.Test
+
 # Configure Oban for tests
 config :subtrack, Oban, testing: :manual, queues: false, plugins: false
 

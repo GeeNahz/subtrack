@@ -162,7 +162,6 @@ defmodule Subtrack.Accounts.User do
     |> validate_change(:timezone, fn :timezone, zone ->
       if Subtrack.Timezones.valid?(zone), do: [], else: [timezone: "is not a valid timezone"]
     end)
-    |> unique_constraint(:phone_number)
     |> reset_phone_confirmation()
   end
 
@@ -176,5 +175,17 @@ defmodule Subtrack.Accounts.User do
     else
       changeset
     end
+  end
+
+  @doc """
+  Marks the phone as verified. The partial unique index guards double ownership.
+  """
+  def phone_verified_changeset(user) do
+    user
+    |> change(phone_confirmed_at: DateTime.utc_now(:second))
+    |> unique_constraint(:phone_number,
+      name: :users_verified_phone_number_index,
+      message: "could not be verified"
+    )
   end
 end

@@ -341,4 +341,10 @@ defmodule Subtrack.Accounts do
     |> User.contact_changeset(attrs)
     |> Repo.update()
   end
+
+  defdelegate start_phone_verification(scope),
+    to: Subtrack.Accounts.PhoneVerifications,
+    as: :start
+
+  defdelegate confirm_phone(scope, code), to: Subtrack.Accounts.PhoneVerifications, as: :confirm
 end
