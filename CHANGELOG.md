@@ -39,6 +39,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Contact settings page at `GET`/`PUT /settings/contact` (`ContactSettingsController`) to edit timezone and mobile number, backed by `Accounts.change_user_contact/2` and `update_user_contact/2`. It warns when the saved number is not yet verified.
 - `SettingsComponents.settings_nav/1` tab bar linking Account, Profile and "Contact & timezone" settings.
 - `Subtrack.Timezones` with a sorted timezone dropdown list (canonical zones plus `Etc/UTC`) and validation that also accepts legacy aliases such as `Asia/Calcutta`.
+- Mobile number verification by SMS code (`Accounts.PhoneVerifications`, `phone_verifications` table, `Accounts.start_phone_verification/1`, `Accounts.confirm_phone/2`) at `GET /settings/phone/verify`, `POST /settings/phone/verify/send` and `POST /settings/phone/verify`. Codes are 6 digits, stored as an HMAC, valid for 10 minutes, limited to 5 attempts and one resend per 60 seconds; a new code replaces the pending one.
+- `Subtrack.SMS` behaviour with `SMS.Log` (dev, logs the message) and `SMS.Test` (sends `{:sms, to, body}` to the test process) adapters, selected by the `:sms_adapter` setting.
+- `Notifications.ReminderSms`, which builds a short SMS reminder (name, when it renews, date, total amount, optional note).
 
 ### Changed
 - Subscription detail page lists the subscription's reminders, with their notes.
@@ -54,3 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Subscription form, list and detail page show billing cycles as labels (`Monthly`) from `BillingCycles`, and `Subscription.billing_cycle` takes its values from `BillingCycles.all/0`.
 - Reminder form references `Subtrack.Subscriptions.Reminder` by its full module name.
 - `User.contact_changeset/2` strips spaces, dashes, dots and brackets from the phone number before validating it, validates the timezone with `Subtrack.Timezones.valid?/1`, and clears `phone_confirmed_at` whenever the phone number changes.
+- `users.phone_number` is now unique only among verified numbers (partial index `users_verified_phone_number_index`); verifying a number removes the verification from any other account holding it, and `contact_changeset/2` no longer carries the unique constraint.
+- `Dispatcher.deliver/4` sends the `sms` channel through `Subtrack.SMS` instead of logging it, and returns `{:permanent, :no_phone_number}` or `{:permanent, :phone_not_verified}` when the user has no verified number.
+- Contact settings page shows whether the number is verified and links to `/settings/phone/verify` when it is not.
+- `ReminderEmail.when_text/1` is public so SMS reminders reuse the same wording.

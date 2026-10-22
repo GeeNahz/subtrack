@@ -86,7 +86,7 @@ defmodule Subtrack.Accounts.PhoneVerifications do
   :no_code | :expired | :too_many_attempts | :invalid_code | %Ecto.Changeset{}
   """
   def confirm(%Scope{user: user}, code) when is_binary(code) do
-    # Count the attemps first, atomically, so parallel guesses can't beat the cap.
+    # Count the attempts first, atomically, so parallel guesses can't beat the cap.
     {_count, rows} =
       from(v in PhoneVerification, where: v.user_id == ^user.id, select: v)
       |> Repo.update_all(inc: [attempts: 1])
