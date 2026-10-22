@@ -35,6 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Subscriptions.BillingCycles`, the single list of billing cycles (`weekly`, `monthly`, `quarterly`, `yearly`) with display labels and date maths: occurrences are always computed from an anchor date, so month-end dates clamp (31 Jan → 28 Feb) without drifting (→ 31 Mar).
 - `billing_anchor_on` column on `subscriptions` (backfilled from `next_renewal_on`, then `NOT NULL`); it is reset whenever the renewal date or billing cycle is edited.
 - `Subscriptions.Renewals` and the `Workers.RollRenewals` cron job (minute 10 of every 6th hour), which move an active subscription's `next_renewal_on` to the next cycle date once the user's local date is more than a day past it. The update is guarded on the old date, so a concurrent user edit wins.
+- Profile settings page at `GET`/`PUT /settings/profile` (`ProfileSettingsController`) to edit first name, last name and username, backed by `Accounts.get_profile!/1`, `change_profile/2` and `update_profile/2`.
+- Contact settings page at `GET`/`PUT /settings/contact` (`ContactSettingsController`) to edit timezone and mobile number, backed by `Accounts.change_user_contact/2` and `update_user_contact/2`. It warns when the saved number is not yet verified.
+- `SettingsComponents.settings_nav/1` tab bar linking Account, Profile and "Contact & timezone" settings.
+- `Subtrack.Timezones` with a sorted timezone dropdown list (canonical zones plus `Etc/UTC`) and validation that also accepts legacy aliases such as `Asia/Calcutta`.
 
 ### Changed
 - Subscription detail page lists the subscription's reminders, with their notes.
@@ -49,3 +53,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PaymentMethodController` and the `payment_method_html` templates (`index`, `new`, `edit`, `show`) are reformatted with `mix format`, with no behaviour change.
 - Subscription form, list and detail page show billing cycles as labels (`Monthly`) from `BillingCycles`, and `Subscription.billing_cycle` takes its values from `BillingCycles.all/0`.
 - Reminder form references `Subtrack.Subscriptions.Reminder` by its full module name.
+- `User.contact_changeset/2` strips spaces, dashes, dots and brackets from the phone number before validating it, validates the timezone with `Subtrack.Timezones.valid?/1`, and clears `phone_confirmed_at` whenever the phone number changes.
